@@ -2,16 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) Launch",
+            "name": "C++ CMake Debug (LLDB)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "enter program name, for example ${workspaceFolder}/build/main",
+            "program": "arch -arm64 lldb ${workspaceFolder}/build/main",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "build_with_ninja",
+            
         }
     ]
 }
