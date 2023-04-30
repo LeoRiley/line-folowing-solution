@@ -55,15 +55,13 @@ vector<Mat> setup(void)
   return symbols;
 }
 
-Mat ConvertImageForLineFollowing(Mat input);
-vector<Point> findStartAndEndPoints(cv::Mat &mask);
-
 int main(int argc, char **argv)
 {
   // variables defined
   vector<Mat> symbols = setup();
-  Mat image, imageHSV, mask, result, BluredHSV;
+  Mat image, imageHSV, mask;
   vector<Point> points;
+  vector<int> angleSpeed;
   int colour = 0;
   // main loop for program
   while (1)
@@ -84,12 +82,21 @@ int main(int argc, char **argv)
     }
 
     // line direction detection
-    points = findStartAndEndPoints(mask);
-    vector<int> angleSpeed;
-    angleSpeed = calculateAngleAndOffset(points);
-    // print out the angle and speed values
-    printf("Angle: %d, Speed: %d\n", angleSpeed[0], angleSpeed[1]);
-    // Code to Send information to car goes Here
+    if (findStartAndEndPoints(mask, points))
+    { // if the line is found
+      // calculate the angle and speed
+      angleSpeed = calculateAngleAndOffset(points);
+      // print out the angle and speed values
+      printf("Angle: %d, Speed: %d\n", angleSpeed[0], angleSpeed[1]);
+      // Code to Send information to car goes Here
+    }
+    else
+    {
+      // car continues strait
+      printf("Line Not Found\n");
+      angleSpeed[0] = STRAITSTEERINGANGLE;
+      angleSpeed[1] = 200;
+    }
 
     if (DEBUG == 1)
     {
@@ -219,25 +226,25 @@ void debugDisplay(Mat image, String title)
   }
 }
 
-vector<Point> findStartAndEndPoints(Mat &mask)
+int findStartAndEndPoints(Mat &mask, vector<Point> &points)
 {
   // Detect lines in the mask using Hough Line Transform
   vector<Vec4i> lines;
-  vector<Point> points;
-  cv::HoughLinesP(mask, lines, 1, CV_PI / 180, 50, 50, 10);
+  HoughLinesP(mask, lines, 1, CV_PI / 180, 50, 50, 10);
 
   if (!lines.empty())
   {
     Point start(lines[0][0], lines[0][1]);
     Point end(lines[0][2], lines[0][3]);
     points.assign({start, end});
-
-    // Draw a circle around the start and end points
-    circle(mask, start, 5, Scalar(0, 255, 0), 2);
-    circle(mask, end, 5, Scalar(0, 255, 0), 2);
+    return 1;
+  }
+  else
+  {
+    printf("no lines found\n");
     return points;
   }
-  return points;
+  return 0;
 }
 
 vector<int> calculateAngleAndOffset(vector<Point> points)
@@ -264,7 +271,7 @@ vector<int> calculateAngleAndOffset(vector<Point> points)
   {
     goingLeft = true;
   }
-
+  // calculate angle and offset
   int angle = atan2(abs(x2 - x1), abs(y2 - y1)) * 180 / CV_PI;
   int offset = abs(x2 - IMAGEWIDTH / 2);
   vector<int> angleAndOffset;
@@ -288,21 +295,6 @@ vector<int> calculateAngleAndOffset(vector<Point> points)
   vector<int> angleSpeed;
   angleSpeed.assign({steeringAng, speed});
   return angleSpeed;
-}
-
-vector<Point> ContoursEdgeMatch(vector<Point> Contour)
-{
-  // describe this function
-  // find the corners of the largest contour
-  for (int i = 0; i < Contour.size(); i++)
-  {
-    if (Contour[i].x == 0 || Contour[i].x == 500 || Contour[i].y == 0 ||
-        Contour[i].y == 500)
-    {
-      Contour.erase(Contour.begin() + i);
-    }
-  }
-  return Contour;
 }
 
 Mat getImage(int debug, string debugImage)
@@ -381,141 +373,3 @@ Mat isolateSymbol(vector<Point> corners, Mat image)
   debugDisplay(warped, "symbol");
   return warped;
 }
-
-Mat perspectiveWarp(Mat image)
-{
-  int widthnumber = 500;
-  // Define the source and destination points for the perspective transform
-  Point2f first[] = {Point2f(0, 0), Point2f(image.cols - 1, 0),
-                     Point2f(image.cols - 1, image.rows - 1),
-                     Point2f(0, image.rows - 1)};
-  Point2f second[] = {Point2f(0, 0), Point2f(image.cols - 1, 0),
-                      Point2f(image.cols - widthnumber - 1, image.rows - 1),
-                      Point2f(widthnumber, image.rows - 1)};
-
-  // applies a transform with the other edge getting contracted
-  // Point2f second[] = {
-  //     Point2f(widthnumber, 0), Point2f(image.cols - widthnumber - 1, 0),
-  //     Point2f(image.cols - 0 - 1, image.rows - 1), Point2f(0, image.rows -
-  //     1)};
-
-  // Apply the perspective transform
-  Mat warped;
-
-  Mat trasnform = getPerspectiveTransform(first, second);
-  warpPerspective(image, warped, trasnform, image.size());
-
-  // Display the warped image
-  // if (DEBUG == 1) {
-  //   imshow("Warped Image", warped);
-  //   waitKey(0);
-  // }
-  return warped;
-}
-
-// calculate line angle from mask
-double lineAngle(Mat mask)
-{
-  // find the line
-  vector<Vec4i> lines;
-  HoughLinesP(mask, lines, 1, CV_PI / 180, 50, 50, 10);
-  // draw the lines
-  Mat lineImage = Mat::zeros(mask.size(), CV_8UC3);
-  int x = 0;
-  for (size_t i = 0; i < lines.size(); i++)
-  {
-    x += 5;
-    Vec4i l = lines[i];
-    line(lineImage, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(x, 255, 255),
-         1, LINE_AA);
-  }
-  // find the angle
-  double angle = 0;
-  // loop through each line in lines
-  for (size_t i = 0; i < lines.size(); i++)
-  {
-    Vec4i l = lines[i];
-    angle += atan2(l[3] - l[1], l[2] - l[0]) * 180 / CV_PI;
-  }
-  angle = angle / lines.size();
-  // display the line image
-  if (DEBUG == 1)
-  {
-    imshow("lineImage", lineImage);
-    waitKey(0);
-  }
-  return angle;
-}
-
-// void sendData(double angle)
-// {
-//     if (DEBUG == 0)
-//     {
-//     }
-//     else if (DEBUG == 1)
-//     {
-//         count << format("The stearing angle should be {}\n", angle) <<
-//         endl;
-//     }
-//     // Serial.println(angle);
-//     // Serial.flush();
-// }
-
-// #include <opencv2/opencv.hpp>
-// #include <iostream>
-
-// using namespace std;
-// using namespace cv;
-
-// int detectShape(Mat image)
-// {
-//     Mat image = imread("OpenCV_Logo.png");
-//     bool done = false;
-
-//     if (image.data == NULL)
-//     {
-//         cout << "No image found! Check path." << endl;
-//         return 1; // ERROR
-//     }
-//     else
-//     {
-//         namedWindow("Selected Image", CV_WINDOW_AUTOSIZE);
-//         imshow("Selected Image", image);
-//         waitKey(); // without this image won't be shown
-
-//         while (!done)
-//         {
-
-//             Mat hsv;
-//             Point2f first[] = {Point2f(0, 0), Point2f(image.cols - 1, 0),
-//             Point2f(image.cols - 1, image.rows - 1), Point2f(0,
-//             image.rows
-//             - 1)}; Point2f second[] = {Point2f(0, 0), Point2f(400, 0),
-//             Point2f(400, 400), Point2f(0, 400)}; cvtColor(image, hsv,
-//             COLOR_BGR2HSV);
-
-//             // Define the color range you want to detect (in this case,
-//             red) Scalar lower_color = Scalar(0, 50, 50); Scalar
-//             upper_color = Scalar(10, 255, 255);
-
-//             // Create a mask to select only the color range
-//             Mat mask;
-//             inRange(hsv, lower_color, upper_color, mask);
-
-//             GaussianBlur(hsv, hsv, Size(3, 3), 0);
-//             Canny(hsv, hsv, 100, 200);
-//             std::vector<std::vector<Point>> c;
-
-//             findContours(hsv, c, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-//             Mat trasnform = getPerspectiveTransform(first, second);
-//             Mat output;
-//             warpPerspective(image, output, trasnform, size(400, 400));
-
-//             // testing
-//             imshow("Original", image);
-//             imshow("Transformed", output);
-//         }
-//     }
-//     return 0; // OK
-// }
