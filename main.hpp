@@ -16,7 +16,7 @@ using namespace std;
 Mat getImage(int debug = 0, string debugImage = "/images/1.jpg");
 Mat cropImageTop(Mat image);
 int findStartAndEndPoints(Mat &mask, vector<Point> &points);
-Mat maskBasedOnColour(int inputImage, int colour);
+Mat maskBasedOnColour(Mat inputImage, int colour);
 int checkNumberOfMaskedPixels(Mat mask);
 Mat ConvertImageForLineFollowing(Mat input);
 vector<int> calculateAngleAndOffset(vector<Point> points);
