@@ -140,14 +140,12 @@ int DetectLineColour(Mat image, vector<Mat> symbols, int previousColour)
   cvtColor(image, image, COLOR_BGR2HSV);
   // isolate pink colour from image
   Mat mask;
-  inRange(image, Scalar(120, 20, 20), Scalar(177, 255, 255), mask);
+  inRange(image, Scalar(120, 20, 20), Scalar(177, 255, 255), mask); // mask pink colour
   debugDisplay(mask, "mat of color");
   // find contours
   vector<vector<Point>> contours;
   vector<Vec4i> hierarchy;
   findContours(mask, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-  // find the corners of the largest contour
-  vector<Point> corners;
 
   // uses algorithm to simplify the largest contour and find the corners
   double epsilon = 0.1 * arcLength(contours[0], true);
@@ -159,12 +157,10 @@ int DetectLineColour(Mat image, vector<Mat> symbols, int previousColour)
     return previousColour;
   }
   Mat symbol = isolateSymbol(fourCorners, mask);
-
-  printf("image is of size %d,%d\n", symbol.rows, symbol.cols);
-  printf("symbol is of size %d,%d\n", symbols[0].rows, symbols[0].cols);
-  for (int j = 0; j < 4; j++)
+  
+  for (int j = 0; j < 4; j++) // loop through all rotations of the symbol
   {
-    for (int i = 0; i < symbols.size(); i++)
+    for (int i = 0; i < symbols.size(); i++) // loop through all symbols
     {
       float matchPercent = compareImages(symbol, symbols[i]);
       if (matchPercent > 80)
@@ -192,6 +188,7 @@ float compareImages(Mat cameraImage, Mat librarySymbol)
 
 void debugDisplay(Mat image, String title)
 {
+  // function that displays an image is the code is in debug mode
   if (DEBUG == 1)
   {
     imshow(title, image);
@@ -301,7 +298,6 @@ Mat getImage(int debug, string debugImage)
   }
   // flip image vertically
   flip(image, image, -1);
-  // image.convertTo(image, -1, 2, 0);
 
   if (debug == 1)
   {
@@ -341,6 +337,7 @@ Mat cropImageTop(Mat image)
 
 Mat isolateSymbol(vector<Point> corners, Mat image)
 {
+  // isolates the symbol from the image and change the perspective and size to match the reference images
   Mat warped;
   int imagewidth = 350;
   int imageheight = 350;
