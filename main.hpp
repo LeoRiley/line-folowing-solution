@@ -29,3 +29,4 @@ Mat isolateSymbol(vector<Point> corners, Mat image);
 float compareImages(Mat cameraImage, Mat librarySymbol);
 void debugDisplay(Mat image, String title);
 Mat maskBasedOnColour(int inputImage, int colour);
+int checkNumberOfMaskedPixels(Mat mask);

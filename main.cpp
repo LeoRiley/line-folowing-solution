@@ -75,6 +75,13 @@ int main(int argc, char **argv)
     // Line Detection
     imageHSV = ConvertImageForLineFollowing(imageHSV); // Lowers the resolution of the image to make it easier to process
     mask = maskBasedOnColour(imageHSV, colour);
+    if (checkNumberOfMaskedPixels(Mat mask) < 3)
+    {
+      // if the mask is empty then the car has finished folowing the line and so returns to black line
+      printf("Following Black line based on pixel Check\n");
+      mask = maskBasedOnColour(imageHSV, 0);
+      colour = 0;
+    }
 
     // line direction detection
     points = findStartAndEndPoints(mask);
@@ -134,6 +141,22 @@ Mat maskBasedOnColour(int inputImage, int colour)
   return mask;
 }
 
+int checkNumberOfMaskedPixels(Mat mask)
+{
+  int count = 0;
+  for (int i = 0; i < mask.rows; i++)
+  {
+    for (int j = 0; j < mask.cols; j++)
+    {
+      if (mask.at<uchar>(i, j) == 255)
+      {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
 int DetectLineColour(Mat image, vector<Mat> symbols, int previousColour)
 {
   // change perspective
@@ -157,7 +180,7 @@ int DetectLineColour(Mat image, vector<Mat> symbols, int previousColour)
     return previousColour;
   }
   Mat symbol = isolateSymbol(fourCorners, mask);
-  
+
   for (int j = 0; j < 4; j++) // loop through all rotations of the symbol
   {
     for (int i = 0; i < symbols.size(); i++) // loop through all symbols
