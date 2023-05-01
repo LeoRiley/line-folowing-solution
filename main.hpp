@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <system_error>
+#include "I2C.hpp"
 using namespace cv;
 using namespace std;
 
