@@ -6,7 +6,8 @@ project(my_project)
 find_package(OpenCV REQUIRED)
 
 # Add include directories for OpenCV
-include_directories(/opt/homebrew/Cellar/opencv/4.7.0_1/include/opencv4/opencv2/)
+# include_directories(/opt/homebrew/Cellar/opencv/4.7.0_1/include/opencv4/opencv2/)
+# include_directories(C:\Users\leori\Downloads\opencv\build\include\opencv2\)
 
 
 # Add executable

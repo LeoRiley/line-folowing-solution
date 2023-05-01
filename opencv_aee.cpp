@@ -26,6 +26,7 @@ void setupCamera(int width, int height)
 	cap.set(CAP_PROP_FRAME_WIDTH, width);
 	cap.set(CAP_PROP_FRAME_HEIGHT, height);
 	cameraFlag = 1;
+
 }
 
 void resizeCamera(int width, int height)
