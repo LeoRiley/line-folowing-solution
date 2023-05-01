@@ -18,7 +18,7 @@ using namespace std;
 
 // defining values
 #define DEBUG 1
-#define IMPATH "/Users/leoriley/Documents/projects/line folowing/images/26.png"
+#define IMPATH "/Users/leoriley/Documents/projects/line folowing/images/6.jpg"
 #define IMAGEWIDTH 100
 #define IMAGEHEIGHT 100
 #define STRAITSTEERINGANGLE 56
@@ -82,6 +82,7 @@ int main(int argc, char **argv) {
       mask = maskBasedOnColour(imageHSV, 0);
       colour = 0;
     }
+    debugDisplay(mask, "mask of line");
 
     // line direction detection
     if (findStartAndEndPoints(mask, points)) { // if the line is found
