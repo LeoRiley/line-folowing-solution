@@ -9,6 +9,7 @@
 #include <linux/i2c-dev.h>
 #include <unistd.h>
 #include <string.h>
+using namespace std;
 
 class I2C
 {

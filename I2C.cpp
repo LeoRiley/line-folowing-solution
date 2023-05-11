@@ -6,6 +6,7 @@
 #include <linux/i2c-dev.h>
 #include <unistd.h>
 #include <string.h>
+using namespace std;
 
 // Define the I2C address of the Arduino Nano
 #define ARDUINO_ADDR 0x08
@@ -51,14 +52,14 @@ public:
         data[1] = Speed;
         data[2] = Speed;
 
-        data[0] = angle;
+        data[0] = ServoAngle;
         if (write(file, data, 3) != 3)
         {
             printf("Failed to write to the I2C bus\n");
             close(file);
             return 0;
         }
-        printf("Servo angle set to %d, motor speeds set to %hhu, %hhu\n", angle, data[1], data[2]);
+        printf("Servo angle set to %d, motor speeds set to %hhu, %hhu\n", ServoAngle, data[1], data[2]);
         return 1;
     }
     int CloseConnection()

@@ -15,7 +15,7 @@ using namespace std;
 
 // header files
 #include "main.hpp"
-#include "opencv_aee.hpp"
+// #include "opencv_aee.hpp"
 
 // defining values
 #define DEBUG 1
@@ -265,9 +265,7 @@ vector<int> calculateAngleAndOffset(vector<Point> points)
 {
   // calculate angle and offset
   // point 0 is at the bottom of the image
-
-  // work out which point is further down the image
-
+  // works out which point is further down the imag
   if (points[0].y > points[1].y)
   {
     // swap points
@@ -275,6 +273,7 @@ vector<int> calculateAngleAndOffset(vector<Point> points)
     points[0] = points[1];
     points[1] = temp;
   }
+  // assignes points 
   int x1 = points[0].x;
   int y1 = points[0].y;
   int x2 = points[1].x;
@@ -303,8 +302,7 @@ vector<int> calculateAngleAndOffset(vector<Point> points)
 
   // calculating steering angle
   int steeringAng;
-  steeringAng =
-      STRAITSTEERINGANGLE + angle * ANGLEMULTIPLIER * ((offset * -0.015) + 1);
+  steeringAng = STRAITSTEERINGANGLE + angle * ANGLEMULTIPLIER * ((offset * -0.015) + 1);
   int speed = 100 + (1 / abs(angle)) * 60;
   vector<int> angleSpeed;
   angleSpeed.assign({steeringAng, speed});
